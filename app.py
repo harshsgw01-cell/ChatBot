@@ -1,9 +1,8 @@
 import streamlit as st
-import os
-from dotenv import load_dotenv
 import pandas as pd
 import plotly.express as px
-# ✅ OpenAI API
+
+# ✅ OpenAI API (new SDK)
 from openai import OpenAI
 
 from data import (
@@ -16,31 +15,22 @@ from data import (
 from lang import LANGUAGES, get_text
 
 # =========================
-# Load environment variables
+# PAGE CONFIG
 # =========================
-load_dotenv(override=True)
-
+st.set_page_config(page_title="CEO Analytic Dashboard", layout="wide")
 
 # =========================
-# API KEY SECTION
+# API KEY (Streamlit Secrets ONLY)
 # =========================
-st.session_state.openai_api_key = os.getenv("OPENAI_API_KEY") or ""
-
+st.session_state.openai_api_key = st.secrets["OPENAI_API_KEY"]
 
 # =========================
 # Initialize OpenAI client
 # =========================
-client = OpenAI(
-    api_key=st.session_state.openai_api_key
-)
+client = OpenAI(api_key=st.session_state.openai_api_key)
 
 # Choose OpenAI model
-GEN_AI_MODEL = "gpt-4o"  # or "gpt-4o-mini" for faster/cheaper responses
-
-# =========================
-# Page config
-# =========================
-st.set_page_config(page_title="CEO Analytic Dashboard", layout="wide")
+GEN_AI_MODEL = "gpt-4o"  # or "gpt-4o-mini"
 
 # =========================
 # LANGUAGE TOGGLE
@@ -58,7 +48,7 @@ st.session_state.lang = lang
 txt = get_text(lang)
 
 # =========================
-# Load Data
+# LOAD DATA
 # =========================
 finance = get_financial_data()
 trend = get_revenue_trend_data()
@@ -133,12 +123,11 @@ st.subheader(txt["ceo_insight"])
 st.info(get_ceo_summary())
 
 # =========================
-# AI EXECUTIVE ASSISTANT (OpenAI)
+# AI EXECUTIVE ASSISTANT
 # =========================
 def ai_analyze(messages, max_history=5):
     history = messages[-max_history:]
-    
-    # Build conversation messages for OpenAI format
+
     conversation_messages = [
         {
             "role": "system",
@@ -150,23 +139,20 @@ Employee Data: {employee}
 Revenue Trend: {trend.to_dict()}"""
         }
     ]
-    
-    # Add conversation history
+
     for msg in history:
-        conversation_messages.append({
-            "role": msg["role"],
-            "content": msg["content"]
-        })
-    
+        conversation_messages.append(
+            {"role": msg["role"], "content": msg["content"]}
+        )
+
     try:
-        # ✅ OpenAI Chat Completion API call
         response = client.chat.completions.create(
             model=GEN_AI_MODEL,
             messages=conversation_messages,
             temperature=0.7,
-            max_tokens=500
+            max_tokens=500,
         )
-        return response.choices[0].message.content or "⚠️ No response from AI."
+        return response.choices[0].message.content
     except Exception as e:
         return f"❌ AI Error: {e}"
 
@@ -185,7 +171,9 @@ for q in txt["quick_questions"]:
     if st.sidebar.button(q, key=f"quick_{q}"):
         st.session_state.chat_history.append({"role": "user", "content": q})
         reply = ai_analyze(st.session_state.chat_history)
-        st.session_state.chat_history.append({"role": "assistant", "content": reply})
+        st.session_state.chat_history.append(
+            {"role": "assistant", "content": reply}
+        )
 
 # Clear chat
 if st.sidebar.button(txt["clear_chat"]):
