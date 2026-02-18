@@ -1,15 +1,10 @@
 import pandas as pd
 from db import get_connection
 
-
 # ------------------------------
 # FINANCE: from finance_kpi
 # ------------------------------
 def fetch_financial_data():
-    """
-    Returns the latest period's KPIs, from table finance_kpi.
-    No hard-coded numbers: everything is from DB.
-    """
     conn = get_connection()
     if not conn:
         return {"revenue": 0.0, "expenses": 0.0, "profit": 0.0}
@@ -19,7 +14,6 @@ def fetch_financial_data():
         SELECT revenue_qr, expenses_qr
         FROM finance_kpi
         ORDER BY id DESC
-        LIMIT 1
     """)
     row = cur.fetchone()
     cur.close()
@@ -36,15 +30,10 @@ def fetch_financial_data():
         "profit": float(profit),
     }
 
-
 # ------------------------------
 # SALES TREND: from monthly_revenue
 # ------------------------------
 def fetch_sales_data():
-    """
-    Returns list of dicts for Streamlit trend chart.
-    All values come from monthly_revenue.
-    """
     conn = get_connection()
     if not conn:
         return []
@@ -61,28 +50,10 @@ def fetch_sales_data():
     conn.close()
     return df.to_dict(orient="records")
 
-
 # ------------------------------
 # EMPLOYEES: from employees + former_employees
 # ------------------------------
 def fetch_employee_data():
-    """
-    HR metrics from your tables:
-    - total_employees: count in employees
-    - active_employees: same as total_employees (current headcount)
-    - former_employees: count in former_employees
-    - attrition_rate: former / (employees + former) * 100
-    - turnover_last_year: former employees leaving in the last 12 months
-    - turnover_breakdown: list of dicts per department with total exits, terminations,
-                          resignations, family-related exits, and percentage
-    - top_turnover_department: department with highest number of exits
-    - top_turnover_pct: that department's share (%) of total exits
-    - turnover_main_reasons: high-level list of key reasons
-    - turnover_cost_qr: placeholder (0.0 for now)
-    - engagement_score: 0.0 for now
-    - new_joiners_2023_2024: count from new_joiners_2023_2024 table
-    - on_probation: count of probation_status = 'On Probation'
-    """
     conn = get_connection()
     if not conn:
         return {
@@ -114,14 +85,13 @@ def fetch_employee_data():
     total_population = total_emp + former_emp
     attrition_rate = (former_emp / total_population * 100) if total_population > 0 else 0.0
 
-    # # turnover in last 12 months (PostgreSQL syntax)
+    # turnover in last 12 months
     cur.execute("""
         SELECT COUNT(*)
         FROM former_employees
-        WHERE date_of_leaving >= (CURRENT_DATE - INTERVAL '12 months')
+        WHERE date_of_leaving >= DATEADD(month, -12, GETDATE())
     """)
     turnover_last_year = cur.fetchone()[0]
-    
 
     # turnover breakdown by department
     cur.execute("""
@@ -152,20 +122,21 @@ def fetch_employee_data():
         for row in dept_rows:
             dept, total_exits, terminations, resignations, family_related = row
             pct = (total_exits / former_emp) * 100 if former_emp > 0 else 0.0
-        turnover_breakdown.append({
-            "department": dept,
-            "total_exits": int(total_exits),
-            "terminations": int(terminations or 0),
-            "resignations": int(resignations or 0),
-            "family_related_exits": int(family_related or 0),
-            "percentage_of_exits": round(pct, 2),
-        })
+            turnover_breakdown.append({
+                "department": dept,
+                "total_exits": int(total_exits),
+                "terminations": int(terminations or 0),
+                "resignations": int(resignations or 0),
+                "family_related_exits": int(family_related or 0),
+                "percentage_of_exits": round(pct, 2),
+            })
+
         # find department with highest exits
         top_row = max(turnover_breakdown, key=lambda r: r["total_exits"])
         top_turnover_department = top_row["department"]
         top_turnover_pct = top_row["percentage_of_exits"]
 
-    # high-level reasons (from your dataset patterns)
+    # high-level reasons
     turnover_main_reasons = [
         "family-related commitments and relocation (childcare, elderly parents, marriage)",
         "long working hours, stress and work-life balance issues",
@@ -173,8 +144,13 @@ def fetch_employee_data():
         "performance, safety or policy-related terminations",
     ]
 
-    # placeholder for cost (you can replace with proper calc later)
-    turnover_cost_qr = 0.0
+    # 🔹 turnover cost calculation from salary columns
+    cur.execute("""
+        SELECT ISNULL(SUM(basic_salary + ISNULL(housing_allowance,0) + ISNULL(transport_allowance,0)),0)
+        FROM former_employees
+    """)
+    total_salary_left = cur.fetchone()[0]
+    turnover_cost_qr = float(total_salary_left) * 0.40
 
     # engagement placeholder
     engagement_score = 0.0
@@ -204,20 +180,16 @@ def fetch_employee_data():
         "top_turnover_department": top_turnover_department,
         "top_turnover_pct": round(top_turnover_pct, 2),
         "turnover_main_reasons": turnover_main_reasons,
-        "turnover_cost_qr": float(turnover_cost_qr),
+        "turnover_cost_qr": turnover_cost_qr,
         "engagement_score": engagement_score,
         "new_joiners_2023_2024": new_joiners_count,
         "on_probation": on_probation,
     }
 
-
 # ------------------------------
-# EMPLOYEE DETAILS: ALL CURRENT EMPLOYEES
+# EMPLOYEE DETAILS
 # ------------------------------
 def fetch_employee_details():
-    """
-    Returns full details for all current employees from employees table.
-    """
     conn = get_connection()
     if not conn:
         return pd.DataFrame()
@@ -235,8 +207,7 @@ def fetch_employee_details():
             contract_type,
             basic_salary,
             housing_allowance,
-            transport_allowance,
-            total_salary
+            transport_allowance
         FROM employees
         ORDER BY employee_id
         """,
@@ -245,15 +216,10 @@ def fetch_employee_details():
     conn.close()
     return df
 
-
 # ------------------------------
-# FORMER EMPLOYEES: TURNOVER SOURCE
+# FORMER EMPLOYEES
 # ------------------------------
 def fetch_former_employees():
-    """
-    Returns all former employees from former_employees table.
-    Used for turnover, early resignations, and resignation reasons.
-    """
     conn = get_connection()
     if not conn:
         return pd.DataFrame()
@@ -284,7 +250,6 @@ def fetch_former_employees():
     conn.close()
     return df
 
-
 # ------------------------------
 # INSTRUCTOR PERFORMANCE
 # ------------------------------
@@ -306,7 +271,6 @@ def fetch_instructor_performance():
     )
     conn.close()
     return df
-
 
 # ------------------------------
 # NEW JOINERS
@@ -334,8 +298,26 @@ def fetch_new_joiners():
     conn.close()
     return df
 
-
 # ------------------------------
+# EMPLOYEE TREND
+# ------------------------------
+def fetch_employee_trend():
+    conn = get_connection()
+    if not conn:
+        return pd.DataFrame()
+
+    df = pd.read_sql(
+        """
+        SELECT MONTH(date_of_joining) AS month,
+               COUNT(*) AS monthly_new_employees
+        FROM employees
+        GROUP BY MONTH(date_of_joining)
+        ORDER BY month ASC
+        """,
+        conn
+    )
+    conn.close()
+    return df
 # PERFORMANCE RISKS
 # ------------------------------
 def fetch_performance_risks():
@@ -379,25 +361,3 @@ def fetch_performance_risks():
         "probation_failed_count": probation_failed,
         "probation_failed_names": probation_failed_names,
     }
-
-
-# ------------------------------
-# EMPLOYEE TREND
-# ------------------------------
-def fetch_employee_trend():
-    conn = get_connection()
-    if not conn:
-        return pd.DataFrame()
-
-    df = pd.read_sql(
-        """
-        SELECT EXTRACT(MONTH FROM date_of_joining) AS month,
-               COUNT(*) AS monthly_new_employees
-        FROM employees
-        GROUP BY month
-        ORDER BY month ASC
-        """,
-        conn
-    )
-    conn.close()
-    return df

@@ -6,6 +6,7 @@ from data import (
     fetch_employee_data,
     fetch_performance_risks,
     fetch_former_employees,
+   fetch_former_employees,
     fetch_employee_details,   # uses employees table
 )
 import pandas as pd
