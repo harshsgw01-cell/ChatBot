@@ -33,483 +33,8 @@ def get_greeting() -> str:
 
 
 # =========================
-# CUSTOM CSS — PREMIUM LIGHT THEME + ANIMATIONS + MOBILE FIX
+# SESSION STATE
 # =========================
-st.markdown(
-    """
-<style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap');
-
-:root {
-    --bg-primary: #FFFFFF;
-    --bg-secondary: #FFFFFF;
-    --bg-card: #FFFFFF;
-    --bg-hover: #F1F4F9;
-    --border: rgba(0,0,0,0.07);
-    --border-accent: rgba(99,102,241,0.35);
-    --text-primary: #0F1523;
-    --text-secondary: #4B5675;
-    --text-muted: #9BA3B8;
-    --accent-indigo: #6366F1;
-    --accent-teal: #0D9488;
-    --gradient-main: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #06B6D4 100%);
-    --shadow-sm: 0 1px 4px rgba(0,0,0,0.06);
-    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
-    --shadow-lg: 0 12px 40px rgba(0,0,0,0.10);
-    --shadow-glow: 0 0 30px rgba(99,102,241,0.12);
-    --toolbar-height: 3rem;
-}
-
-* { font-family: 'DM Sans', -apple-system, sans-serif; box-sizing: border-box; }
-footer { visibility: hidden; }
-[data-testid="stDecoration"] { display: none; }
-
-header[data-testid="stHeader"] {
-    background: #FFFFFF !important;
-    border-bottom: 1px solid var(--border) !important;
-    box-shadow: var(--shadow-sm) !important;
-    z-index: 999 !important;
-}
-
-.block-container {
-    padding-top: calc(var(--toolbar-height) + 1rem) !important;
-    padding-bottom: 2rem;
-    max-width: 1400px;
-    animation: contentSlideUp 0.7s ease-out 0.1s both;
-}
-
-@media (max-width: 768px) {
-    .block-container {
-        padding-top: calc(var(--toolbar-height) + 0.5rem) !important;
-        padding-left: 0.75rem  !important;
-        padding-right: 0.75rem !important;
-    }
-}
-
-.stApp {
-    background: #FFFFFF;
-    color: var(--text-primary);
-    min-height: 100vh;
-    animation: pageFadeIn 0.7s ease-out both;
-}
-
-main [data-testid="stVerticalBlock"] {
-    animation: contentSlideUp 0.7s ease-out 0.15s both;
-}
-
-/* ─────────────────────────────────────────
-   TOP BAR — always one row, icons never wrap
-───────────────────────────────────────── */
-.topbar-outer {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    flex-wrap: nowrap !important;
-    padding: 0.6rem 0 0.55rem 0;
-    gap: 0.5rem;
-}
-.topbar-left {
-    flex: 1 1 auto;
-    min-width: 0;
-}
-.topbar-title {
-    font-family: 'DM Serif Display', Georgia, serif;
-    font-size: 1.5rem;
-    font-weight: 400;
-    color: var(--text-primary);
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    animation: slideDownFadeIn 0.8s ease-out 0.1s both;
-}
-.topbar-subtitle {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    letter-spacing: 0.04em;
-    margin-top: 0.15rem;
-    text-transform: uppercase;
-    white-space: nowrap;
-    animation: slideUpFadeIn 0.8s ease-out 0.15s both;
-}
-
-/* Force the Streamlit columns holding the icons to shrink, not wrap */
-div[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] button[title="Chat"]) {
-    flex: 0 0 auto !important;
-    min-width: unset !important;
-    max-width: 96px !important;
-    gap: 0.25rem !important;
-}
-div[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] button[title="Chat"]) > div[data-testid="stColumn"] {
-    flex: 0 0 44px !important;
-    min-width: 44px !important;
-    padding: 0 2px !important;
-}
-
-/* The outer stHorizontalBlock for the whole topbar row */
-.topbar-row-block > div[data-testid="stHorizontalBlock"] {
-    align-items: center !important;
-    flex-wrap: nowrap !important;
-    gap: 0 !important;
-}
-/* Title column takes remaining space */
-.topbar-row-block > div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:first-child {
-    flex: 1 1 auto !important;
-    min-width: 0 !important;
-}
-/* Icon column fixed width */
-.topbar-row-block > div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child {
-    flex: 0 0 96px !important;
-    min-width: 96px !important;
-    max-width: 96px !important;
-}
-
-@media (max-width: 576px) {
-    .topbar-title    { font-size: 1.05rem !important; }
-    .topbar-subtitle { font-size: 0.6rem  !important; }
-}
-
-/* ─────────────────────────────────────────
-   CHATGPT-STYLE SIDEBAR
-   Fixed top zone  |  Scrollable history
-───────────────────────────────────────── */
-[data-testid="stSidebar"] {
-    background: #FFFFFF !important;
-    border-right: 1px solid var(--border) !important;
-    box-shadow: 2px 0 12px rgba(0,0,0,0.04) !important;
-}
-
-/* Make sidebar a full-height flex column */
-[data-testid="stSidebar"] > div:first-child,
-[data-testid="stSidebar"] section[data-testid="stSidebarContent"] {
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100vh !important;
-    overflow: hidden !important;
-    padding: 0 !important;
-}
-
-/* The root vertical block also stretches */
-[data-testid="stSidebar"] section[data-testid="stSidebarContent"] > div[data-testid="stVerticalBlock"] {
-    display: flex !important;
-    flex-direction: column !important;
-    height: 100% !important;
-    overflow: hidden !important;
-    padding: 0 0.85rem !important;
-    gap: 0 !important;
-}
-
-/* Every direct child except the last = fixed (non-scrolling) */
-[data-testid="stSidebar"] section[data-testid="stSidebarContent"] > div[data-testid="stVerticalBlock"] > div {
-    flex-shrink: 0 !important;
-}
-
-/* The LAST direct child = grows + scrolls (this is where chat list lives) */
-[data-testid="stSidebar"] section[data-testid="stSidebarContent"] > div[data-testid="stVerticalBlock"] > div:last-child {
-    flex: 1 1 auto !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    padding-bottom: 1.5rem !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #E2E5EF transparent !important;
-    margin-top: 0.25rem !important;
-}
-[data-testid="stSidebar"] section[data-testid="stSidebarContent"] > div[data-testid="stVerticalBlock"] > div:last-child::-webkit-scrollbar {
-    width: 3px !important;
-}
-[data-testid="stSidebar"] section[data-testid="stSidebarContent"] > div[data-testid="stVerticalBlock"] > div:last-child::-webkit-scrollbar-thumb {
-    background: #E2E5EF !important;
-    border-radius: 4px !important;
-}
-
-div[data-testid="collapsedControl"] {
-    background: #FFFFFF !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px;
-    color: var(--text-secondary) !important;
-    box-shadow: var(--shadow-sm) !important;
-}
-
-/* ── SIDEBAR BUTTONS ── */
-[data-testid="stSidebar"] div[data-testid="stButton"] > button {
-    width: 100%;
-    text-align: left;
-    background: transparent !important;
-    border: none !important;
-    border-radius: 8px;
-    padding: 0.5rem 0.75rem;
-    font-size: 0.875rem;
-    color: var(--text-secondary) !important;
-    font-weight: 400;
-    box-shadow: none !important;
-    transition: all 0.2s ease;
-    letter-spacing: 0.01em;
-}
-[data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {
-    background: var(--bg-hover) !important;
-    color: var(--text-primary) !important;
-}
-
-.new-chat-btn div[data-testid="stButton"] > button {
-    background: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(6,182,212,0.06) 100%) !important;
-    border: 1px solid rgba(99,102,241,0.25) !important;
-    color: #4F46E5 !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.02em;
-    transition: all 0.25s ease !important;
-}
-.new-chat-btn div[data-testid="stButton"] > button:hover {
-    background: linear-gradient(135deg, rgba(99,102,241,0.14) 0%, rgba(6,182,212,0.1) 100%) !important;
-    border-color: rgba(99,102,241,0.5) !important;
-    color: #4338CA !important;
-    box-shadow: 0 4px 16px rgba(99,102,241,0.15) !important;
-}
-
-.clear-btn div[data-testid="stButton"] > button {
-    color: #EF4444 !important;
-    font-size: 0.82rem !important;
-}
-.clear-btn div[data-testid="stButton"] > button:hover {
-    background: rgba(239,68,68,0.07) !important;
-    color: #DC2626 !important;
-}
-
-.del-btn div[data-testid="stButton"] > button {
-    color: #9BA3B8 !important;
-    font-size: 0.8rem !important;
-    padding: 0.2rem 0.5rem !important;
-    border-radius: 999px !important;
-    width: 100% !important;
-    text-align: center !important;
-}
-.del-btn div[data-testid="stButton"] > button:hover {
-    color: #EF4444 !important;
-    background: rgba(239,68,68,0.10) !important;
-}
-
-.section-label {
-    font-size: 0.68rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 1rem 0.75rem 0.3rem 0.75rem;
-    display: block;
-}
-
-.sidebar-divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 0.6rem 0;
-}
-
-[data-testid="stSidebar"] input[type="text"] {
-    background: var(--bg-primary) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-    font-size: 0.875rem !important;
-    color: var(--text-primary) !important;
-    transition: border-color 0.2s ease;
-}
-[data-testid="stSidebar"] input[type="text"]:focus {
-    border-color: var(--border-accent) !important;
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.08) !important;
-}
-
-[data-testid="stSidebar"] details {
-    border: none !important;
-    box-shadow: none !important;
-    background: transparent !important;
-}
-[data-testid="stSidebar"] summary {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    padding: 0.45rem 0.75rem;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-}
-[data-testid="stSidebar"] summary:hover {
-    background: var(--bg-hover);
-    color: var(--text-primary);
-}
-
-/* ── METRICS ── */
-[data-testid="stMetricValue"] {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    animation: slideUpFadeIn 0.8s ease-out forwards;
-}
-[data-testid="stMetricLabel"] {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    letter-spacing: 0.02em;
-}
-[data-testid="metric-container"] {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 1.25rem;
-    box-shadow: var(--shadow-sm);
-    animation: fadeInScale 0.6s ease-out 0.1s both;
-}
-
-/* ── WELCOME SCREEN ── */
-.welcome-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 42vh;
-    text-align: center;
-    padding: 3rem 2rem;
-    animation: contentSlideUp 0.8s ease-out 0.2s both;
-}
-.welcome-orb {
-    width: 88px;
-    height: 88px;
-    background: conic-gradient(from 180deg, #6366F1, #8B5CF6, #06B6D4, #6366F1);
-    border-radius: 50%;
-    margin-bottom: 2rem;
-    position: relative;
-    animation: orbSpin 10s linear infinite, orbPulse 3s ease-in-out infinite, fadeInScale 0.7s ease-out 0.1s both;
-    box-shadow: 0 8px 40px rgba(99,102,241,0.25), 0 0 80px rgba(99,102,241,0.1);
-}
-.welcome-greeting {
-    font-family: 'DM Serif Display', Georgia, serif;
-    font-size: 2.4rem;
-    font-weight: 400;
-    color: var(--text-primary);
-    letter-spacing: -0.03em;
-    margin-bottom: 0.75rem;
-    animation: slideDownFadeIn 0.8s ease-out 0.2s both;
-}
-.welcome-sub {
-    font-size: 0.95rem;
-    color: var(--text-secondary);
-    max-width: 480px;
-    line-height: 1.75;
-    animation: slideUpFadeIn 0.8s ease-out 0.4s both;
-}
-
-/* ── SUGGESTION BUTTONS ── */
-.suggestion button {
-    height: auto !important;
-    min-height: 90px !important;
-    white-space: pre-wrap !important;
-    text-align: left !important;
-    padding: 1.25rem 1.5rem !important;
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 14px !important;
-    color: var(--text-secondary) !important;
-    font-size: 0.875rem !important;
-    line-height: 1.6 !important;
-    font-weight: 400 !important;
-    box-shadow: var(--shadow-sm) !important;
-    transition: all 0.25s ease !important;
-    animation: slideUpFadeIn 0.6s ease-out both;
-}
-.suggestion > div:nth-child(1) button { animation-delay: 0.1s; }
-.suggestion > div:nth-child(2) button { animation-delay: 0.2s; }
-.suggestion > div:nth-child(3) button { animation-delay: 0.3s; }
-.suggestion button:hover {
-    background: var(--bg-hover) !important;
-    border-color: rgba(99,102,241,0.3) !important;
-    color: var(--text-primary) !important;
-    transform: translateY(-3px) !important;
-    box-shadow: var(--shadow-md) !important;
-}
-
-/* ── CHAT MESSAGES ── */
-.stChatMessage { animation: slideInLeft 0.4s ease-out; }
-
-/* ── CHAT INPUT ── */
-.stChatInputContainer {
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 14px !important;
-    box-shadow: var(--shadow-sm) !important;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
-}
-.stChatInputContainer:focus-within {
-    border-color: var(--border-accent) !important;
-    box-shadow: 0 0 0 3px rgba(99,102,241,0.08), var(--shadow-sm) !important;
-}
-
-hr {
-    border-color: var(--border) !important;
-    margin: 0.5rem 0 1rem 0 !important;
-}
-
-[data-testid="stPlotlyChart"] {
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 14px !important;
-    padding: 0.5rem !important;
-    box-shadow: var(--shadow-sm) !important;
-    animation: fadeInScale 0.5s ease-out 0.2s both;
-}
-
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #E2E5EF; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
-
-/* ── KEYFRAMES ── */
-@keyframes orbSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@keyframes orbPulse {
-    0%, 100% { box-shadow: 0 8px 40px rgba(99,102,241,0.25), 0 0 80px rgba(99,102,241,0.1); }
-    50% { box-shadow: 0 8px 60px rgba(99,102,241,0.35), 0 0 100px rgba(99,102,241,0.18); }
-}
-@keyframes slideUpFadeIn {
-    from { transform: translateY(20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-@keyframes slideDownFadeIn {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-@keyframes slideInLeft {
-    from { transform: translateX(-15px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-@keyframes fadeInScale {
-    from { transform: scale(0.97); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
-}
-@keyframes pageFadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes contentSlideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-/* ── RESPONSIVE ── */
-@media (max-width: 768px) {
-    .welcome-greeting { font-size: 1.8rem; }
-    [data-testid="stSidebar"] { width: 240px !important; }
-}
-@media (max-width: 576px) {
-    .welcome-greeting { font-size: 1.5rem; }
-    [data-testid="stMetricValue"] { font-size: 1.4rem; }
-}
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
-
-# =========================
-# API & SESSION STATE
-# =========================
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-MODEL = "gpt-4o-mini"
-
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 if "mode" not in st.session_state:
@@ -519,8 +44,661 @@ if "saved_chats" not in st.session_state:
 if "current_chat_index" not in st.session_state:
     st.session_state.current_chat_index = None
 if "user_name" not in st.session_state:
-    st.session_state.user_name = "Harsh"
+    st.session_state.user_name = ""
+if "theme_base" not in st.session_state:
+    st.session_state.theme_base = st.get_option("theme.base") or "light"
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = False
 
+# ── Colour palette ──────────────────────────────────────────────────────────
+_D = st.session_state.dark_mode
+if _D:
+    _BG = "#0D1117"
+    _BG2 = "#161B22"
+    _CARD = "#1C2333"
+    _HOVER = "#21283A"
+    _BDR = "rgba(255,255,255,0.10)"
+    _BDRA = "rgba(129,140,248,0.55)"
+    _T1 = "#F0F6FC"
+    _T2 = "#CDD9E5"
+    _T3 = "#8B949E"
+    _T4 = "#6E7681"
+    _ACC = "#818CF8"
+    _TEAL = "#2DD4BF"
+else:
+    _BG = "#FFFFFF"
+    _BG2 = "#FFFFFF"
+    _CARD = "#FFFFFF"
+    _HOVER = "#F1F4F9"
+    _BDR = "rgba(0,0,0,0.07)"
+    _BDRA = "rgba(99,102,241,0.35)"
+    _T1 = "#0F1523"
+    _T2 = "#4B5675"
+    _T3 = "#6B7280"
+    _T4 = "#9BA3B8"
+    _ACC = "#6366F1"
+    _TEAL = "#0D9488"
+
+# Share with dashboard.py
+st.session_state["is_dark"] = _D
+st.session_state["plotly_theme"] = dict(
+    paper_bgcolor=_CARD,
+    plot_bgcolor=_CARD,
+    font=dict(color=_T1, family="DM Sans, sans-serif"),
+    xaxis=dict(gridcolor=_BDR, zerolinecolor=_BDR, color=_T2),
+    yaxis=dict(gridcolor=_BDR, zerolinecolor=_BDR, color=_T2),
+    legend=dict(font=dict(color=_T1)),
+)
+
+# =========================
+# CUSTOM CSS
+# =========================
+st.markdown(
+    f"""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap');
+
+:root {{
+  --bg-primary:    {_BG};
+  --bg-secondary:  {_BG2};
+  --bg-card:       {_CARD};
+  --bg-hover:      {_HOVER};
+  --border:        {_BDR};
+  --border-accent: {_BDRA};
+  --text-primary:  {_T1};
+  --text-secondary:{_T2};
+  --text-muted:    {_T4};
+  --accent-indigo: {_ACC};
+  --accent-teal:   {_TEAL};
+  --gradient-main: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #06B6D4 100%);
+  --shadow-sm:     0 1px 4px rgba(0,0,0,0.06);
+  --shadow-md:     0 4px 16px rgba(0,0,0,0.08);
+  --shadow-lg:     0 12px 40px rgba(0,0,0,0.10);
+  --shadow-glow:   0 0 30px rgba(99,102,241,0.12);
+  --toolbar-height:3rem;
+}}
+
+* {{ font-family: 'DM Sans', -apple-system, sans-serif; box-sizing: border-box; }}
+footer {{ visibility: hidden; }}
+[data-testid="stDecoration"] {{ display: none; }}
+
+/* ROOT BACKGROUNDS */
+html, body, #root,
+[data-testid="stAppViewContainer"],
+[data-testid="stAppViewBlockContainer"],
+.main, .stApp, section.main {{
+    background-color: {_BG} !important;
+    color: {_T1} !important;
+}}
+/* Extra force for occasional white wrapper */
+main > div > div > section > div {{
+    background-color: {_BG} !important;
+}}
+
+header[data-testid="stHeader"] {{
+    background: {_BG} !important;
+    border-bottom: 1px solid {_BDR} !important;
+    box-shadow: var(--shadow-sm) !important;
+    z-index: 999 !important;
+}}
+
+.block-container {{
+    padding-top: calc(var(--toolbar-height) + 1rem) !important;
+    padding-bottom: 2rem;
+    max-width: 1400px;
+    animation: contentSlideUp 0.7s ease-out 0.1s both;
+}}
+@media (max-width: 768px) {{
+    .block-container {{
+        padding-top: calc(var(--toolbar-height) + 0.5rem) !important;
+        padding-left: 0.75rem  !important;
+        padding-right: 0.75rem !important;
+    }}
+}}
+
+.stApp {{
+    background: {_BG};
+    color: {_T1};
+    min-height: 100vh;
+    animation: pageFadeIn 0.7s ease-out both;
+}}
+main [data-testid="stVerticalBlock"] {{
+    animation: contentSlideUp 0.7s ease-out 0.15s both;
+}}
+
+/* TOP BAR */
+.topbar-row {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    padding: 0.65rem 0 0.55rem 0;
+    gap: 0.5rem;
+}}
+.topbar-left {{ flex: 1 1 auto; min-width: 0; }}
+.topbar-title {{
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: {_T1};
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}}
+.topbar-subtitle {{
+    font-size: 0.78rem;
+    color: {_T4};
+    letter-spacing: 0.04em;
+    margin-top: 0.15rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+}}
+.topbar-icons {{
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-shrink: 0;
+}}
+.topbar-icon-btn {{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid {_BDR};
+    border-radius: 10px;
+    background: {_CARD};
+    font-size: 1.1rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+    box-shadow: var(--shadow-sm);
+}}
+.topbar-icon-btn:hover {{
+    background: {_HOVER};
+    border-color: {_BDRA};
+    box-shadow: 0 4px 12px rgba(99,102,241,0.12);
+}}
+.topbar-icon-active {{
+    background: rgba(99,102,241,0.15) !important;
+    border-color: rgba(99,102,241,0.5) !important;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.12) !important;
+}}
+@media (max-width: 576px) {{
+    .topbar-title   {{ font-size: 1.05rem; }}
+    .topbar-subtitle{{ font-size: 0.6rem;  }}
+    .topbar-icon-btn{{ width: 36px; height: 36px; font-size: 1rem; }}
+}}
+
+/* SIDEBAR */
+[data-testid="stSidebar"] {{
+    background: {_BG2} !important;
+    border-right: 1px solid {_BDR} !important;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.04) !important;
+    margin-top: 3.5rem !important;
+}}
+
+[data-testid="stSidebar"] > div:first-child,
+[data-testid="stSidebar"] section[data-testid="stSidebarContent"] {{
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+}}
+
+[data-testid="stSidebar"] section[data-testid="stSidebarContent"] > div[data-testid="stVerticalBlock"] {{
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    padding: 0 0.85rem !important;
+    gap: 0 !important;
+}}
+
+[data-testid="stSidebar"] section[data-testid="stSidebarContent"] > div[data-testid="stVerticalBlock"] > div {{
+    flex-shrink: 0 !important;
+}}
+
+[data-testid="stSidebar"] section[data-testid="stSidebarContent"] > div[data-testid="stVerticalBlock"] > div:last-child {{
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-bottom: 1.5rem !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: {_T4} transparent !important;
+    margin-top: 0.25rem !important;
+}}
+[data-testid="stSidebar"] section[data-testid="stSidebarContent"] > div[data-testid="stVerticalBlock"] > div:last-child::-webkit-scrollbar {{
+    width: 3px !important;
+}}
+[data-testid="stSidebar"] section[data-testid="stSidebarContent"] > div[data-testid="stVerticalBlock"] > div:last-child::-webkit-scrollbar-thumb {{
+    background: {_T4} !important;
+    border-radius: 4px !important;
+}}
+
+/* SIDEBAR TEXT */
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] div,
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] small,
+[data-testid="stSidebar"] a,
+[data-testid="stSidebarContent"] p,
+[data-testid="stSidebarContent"] span,
+[data-testid="stSidebarContent"] div,
+[data-testid="stSidebarContent"] label {{
+    color: {_T2} !important;
+}}
+[data-testid="stSidebar"] button {{
+    color: {_T2} !important;
+}}
+
+.sidebar-header-card {{
+    padding: 1.1rem 0.9rem 0.9rem 0.9rem;
+    border-bottom: 1px solid {_BDR};
+    margin-bottom: 0.4rem;
+}}
+.sidebar-header-title {{
+    font-family:"DM Serif Display",Georgia,serif;
+    font-size:1.05rem;
+    font-weight:500;
+    color:{_T1} !important;
+    letter-spacing:-0.01em;
+    margin-bottom:0.1rem;
+}}
+.sidebar-header-subtitle {{
+    font-size:0.68rem;
+    color:{_T3} !important;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+}}
+
+.sidebar-newchat-wrap {{ padding: 0 0.9rem 0.6rem 0.9rem; }}
+.sidebar-newchat-wrap div[data-testid="stButton"] > button {{
+    width: 100%;
+    justify-content: center;
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #06B6D4 100%) !important;
+    border: none !important;
+    color: #FFFFFF !important;
+    font-size: 0.88rem;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 0.55rem 0.9rem;
+    box-shadow: 0 8px 20px rgba(99,102,241,0.25) !important;
+}}
+.sidebar-newchat-wrap div[data-testid="stButton"] > button:hover {{
+    opacity: 0.95;
+    box-shadow: 0 10px 26px rgba(99,102,241,0.32) !important;
+}}
+
+[data-testid="stSidebar"] div[data-testid="stButton"] > button {{
+    background: transparent !important;
+    border: none !important;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: {_T2} !important;
+    font-weight: 400;
+    box-shadow: none !important;
+    transition: all 0.2s ease;
+    letter-spacing: 0.01em;
+}}
+[data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {{
+    background: {_HOVER} !important;
+    color: {_T1} !important;
+}}
+
+.clear-btn div[data-testid="stButton"] > button {{
+    color: #EF4444 !important;
+    font-size: 0.82rem !important;
+}}
+.clear-btn div[data-testid="stButton"] > button:hover {{
+    background: rgba(239,68,68,0.07) !important;
+}}
+.del-btn div[data-testid="stButton"] > button {{
+    color: {_T4} !important;
+    font-size: 0.8rem !important;
+    padding: 0.2rem 0.5rem !important;
+    border-radius: 999px !important;
+    width: 100% !important;
+    text-align: center !important;
+}}
+.del-btn div[data-testid="stButton"] > button:hover {{
+    color: #EF4444 !important;
+    background: rgba(239,68,68,0.10) !important;
+}}
+
+[data-testid="stSidebar"] {{ width: 300px !important; }}
+@media (max-width: 1024px) {{ [data-testid="stSidebar"] {{ width: 260px !important; }} }}
+@media (max-width: 768px)  {{ [data-testid="stSidebar"] {{ width: 220px !important; }} }}
+@media (max-width: 576px)  {{ [data-testid="stSidebar"] {{ width: 200px !important; }} }}
+
+[data-testid="stSidebar"] [data-testid="stExpander"],
+[data-testid="stSidebar"] [data-testid="stExpander"] > details,
+[data-testid="stSidebar"] [data-testid="stExpander"] > details > summary,
+[data-testid="stSidebar"] [data-testid="stExpander"] > details > div {{
+    background-color: {_CARD} !important;
+    border-color: {_BDR} !important;
+    color: {_T1} !important;
+    border-radius: 10px !important;
+}}
+[data-testid="stSidebar"] [data-testid="stExpander"] * {{ color: {_T1} !important; }}
+
+[data-testid="stSidebar"] input {{
+    background-color: {_CARD} !important;
+    color: {_T1} !important;
+    border-color: {_BDR} !important;
+}}
+[data-testid="stSidebar"] input::placeholder {{ color: {_T4} !important; }}
+
+.section-label {{
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: {_T4} !important;
+    padding: 0.5rem 0.75rem 0.25rem 0.75rem;
+}}
+
+/* MAIN TEXT */
+p, span, li, td, th, caption, label,
+h1, h2, h3, h4, h5, h6,
+.stMarkdown, .stMarkdown *,
+[data-testid="stMarkdownContainer"],
+[data-testid="stMarkdownContainer"] *,
+.element-container p, .element-container span {{
+    color: {_T1} !important;
+}}
+
+/* INPUTS */
+[data-testid="stTextInput"] input,
+[data-testid="stTextArea"] textarea,
+div[data-baseweb="input"] input,
+div[data-baseweb="textarea"] textarea,
+div[data-testid="stDateInput"] input,
+div[data-testid="stNumberInput"] input,
+div[data-baseweb="select"] input {{
+    background-color: {_CARD} !important;
+    color: {_T1} !important;
+    border-color: {_BDR} !important;
+    border-radius: 8px !important;
+    caret-color: {_ACC} !important;
+    box-shadow: var(--shadow-sm) !important;
+}}
+[data-testid="stTextInput"] input::placeholder,
+[data-testid="stTextArea"] textarea::placeholder {{
+    color: {_T4} !important;
+}}
+
+div[data-baseweb="select"] > div,
+div[data-baseweb="popover"],
+div[data-baseweb="menu"] {{
+    background: {_CARD} !important;
+    border-color: {_BDR} !important;
+    color: {_T1} !important;
+}}
+li[role="option"] {{ background: {_CARD} !important; color: {_T1} !important; }}
+li[role="option"]:hover {{ background: {_HOVER} !important; }}
+
+/* CHAT INPUT + BOTTOM BAR */
+[data-testid="stBottom"],
+[data-testid="stBottom"] > div,
+.stChatFloatingInputContainer,
+.stChatFloatingInputContainer > div {{
+    background: {_BG} !important;
+    background-color: {_BG} !important;
+    border-top: 1px solid {_BDR} !important;
+}}
+
+.stChatInputContainer,
+[data-testid="stChatInputContainer"] {{
+    background: {_CARD} !important;
+    border: 1px solid {_BDR} !important;
+    border-radius: 14px !important;
+    box-shadow: var(--shadow-sm) !important;
+}}
+.stChatInputContainer:focus-within,
+[data-testid="stChatInputContainer"]:focus-within {{
+    border-color: {_BDRA} !important;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.10), var(--shadow-sm) !important;
+}}
+.stChatInputContainer textarea,
+[data-testid="stChatInputContainer"] textarea {{
+    background: transparent !important;
+    color: {_T1} !important;
+}}
+.stChatInputContainer textarea::placeholder,
+[data-testid="stChatInputContainer"] textarea::placeholder {{
+    color: {_T4} !important;
+}}
+[data-testid="stChatInputContainer"] button,
+.stChatInputContainer button {{
+    background: transparent !important;
+    color: {_ACC} !important;
+    border: none !important;
+}}
+
+/* CHAT MESSAGES */
+[data-testid="stChatMessage"] {{
+    background: {_CARD} !important;
+    border: 1px solid {_BDR} !important;
+    border-radius: 12px !important;
+    animation: slideInLeft 0.4s.ease-out;
+}}
+[data-testid="stChatMessage"] p,
+[data-testid="stChatMessage"] span,
+[data-testid="stChatMessage"] div {{ color: {_T1} !important; }}
+
+/* METRICS */
+[data-testid="stMetric"] {{
+    background: {_CARD} !important;
+    border: 1px solid {_BDR} !important;
+    border-radius: 12px !important;
+    padding: 1rem !important;
+}}
+[data-testid="stMetricLabel"],
+[data-testid="stMetricLabel"] * {{ color: {_T2} !important; }}
+[data-testid="stMetricValue"],
+[data-testid="stMetricValue"] * {{ color: {_T1} !important; font-weight: 700 !important; }}
+[data-testid="stMetricDelta"],
+[data-testid="stMetricDelta"] * {{ color: {_TEAL} !important; }}
+
+/* DATAFRAMES */
+[data-testid="stDataFrame"], [data-testid="stTable"] {{
+    background: {_CARD} !important;
+    border: 1px solid {_BDR} !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+}}
+[data-testid="stDataFrame"] th, [data-testid="stTable"] th {{
+    background: {_BG2} !important;
+    color: {_T2} !important;
+    border-bottom: 1px solid {_BDR} !important;
+}}
+[data-testid="stDataFrame"] td, [data-testid="stTable"] td {{
+    color: {_T1} !important;
+    border-bottom: 1px solid {_BDR} !important;
+}}
+
+/* EXPANDER (main) */
+[data-testid="stExpander"] {{
+    background: {_CARD} !important;
+    border: 1px solid {_BDR} !important;
+    border-radius: 10px !important;
+}}
+[data-testid="stExpander"] summary {{ color: {_T1} !important; }}
+[data-testid="stExpander"] * {{ color: {_T1} !important; }}
+
+/* RADIO / CHECKBOX */
+.stRadio label, .stRadio label *,
+.stCheckbox label, .stCheckbox label *,
+[data-testid="stWidgetLabel"],
+[data-testid="stWidgetLabel"] * {{ color: {_T2} !important; }}
+
+/* PLOTLY */
+[data-testid="stPlotlyChart"] {{
+    background: {_CARD} !important;
+    border: 1px solid {_BDR} !important;
+    border-radius: 14px !important;
+    padding: 0.5rem !important;
+    box-shadow: var(--shadow-sm) !important;
+}}
+
+/* TABS */
+[data-testid="stTabs"] button {{ color: {_T2} !important; }}
+[data-testid="stTabs"] button[aria-selected="true"] {{
+    color: {_ACC} !important;
+    border-bottom-color: {_ACC} !important;
+}}
+
+/* ALERTS */
+[data-testid="stAlert"] {{
+    background: {_CARD} !important;
+    border-color: {_BDRA} !important;
+    color: {_T1} !important;
+    border-radius: 10px !important;
+}}
+[data-testid="stAlert"] * {{ color: {_T1} !important; }}
+
+/* CODE */
+.stMarkdown code {{
+    background: {_BG2} !important;
+    color: {_ACC} !important;
+    border: 1px solid {_BDR} !important;
+    border-radius: 4px;
+    padding: 0.1rem 0.35rem;
+}}
+.stMarkdown pre {{
+    background: {_BG2} !important;
+    border: 1px solid {_BDR} !important;
+    border-radius: 8px !important;
+    color: {_T1} !important;
+}}
+
+hr {{ border-color: {_BDR} !important; margin: 0.5rem 0 1rem 0 !important; }}
+
+/* SCROLLBARS */
+::-webkit-scrollbar {{ width: 4px; }}
+::-webkit-scrollbar-track {{ background: transparent; }}
+::-webkit-scrollbar-thumb {{ background: {_T4}; border-radius: 4px; }}
+::-webkit-scrollbar-thumb:hover {{ background: {_T3}; }}
+
+/* WELCOME */
+.welcome-container {{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 42vh;
+    text-align: center;
+    padding: 3rem 2rem;
+    animation: contentSlideUp 0.8s ease-out 0.2s both;
+}}
+.welcome-orb {{
+    width: 88px;
+    height: 88px;
+    background: conic-gradient(from 180deg, #6366F1, #8B5CF6, #06B6D4, #6366F1);
+    border-radius: 50%;
+    margin-bottom: 2rem;
+    position: relative;
+    animation: orbSpin 10s linear infinite, orbPulse 3s ease-in-out infinite, fadeInScale 0.7s ease-out 0.1s both;
+    box-shadow: 0 8px 40px rgba(99,102,241,0.25), 0 0 80px rgba(99,102,241,0.1);
+}}
+.welcome-greeting {{
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 2.4rem;
+    font-weight: 400;
+    color: {_T1};
+    letter-spacing: -0.03em;
+    margin-bottom: 0.75rem;
+}}
+.welcome-sub {{
+    font-size: 0.95rem;
+    color: {_T2};
+    max-width: 480px;
+    line-height: 1.75;
+}}
+
+/* SUGGESTION CARDS - force dark bg / white text */
+section.main .block-container > div .stColumns div[data-testid="column"] div[data-testid="stButton"] > button {{
+    height: auto !important;
+    min-height: 90px !important;
+    white-space: pre-wrap !important;
+    text-align: left !important;
+    padding: 1.25rem 1.5rem !important;
+    background-color: {_CARD} !important;
+    background: {_CARD} !important;
+    border: 1px solid {_BDR} !important;
+    border-radius: 14px !important;
+    color: {_T1} !important;
+    font-size: 0.875rem !important;
+    line-height: 1.6 !important;
+    font-weight: 400 !important;
+    box-shadow: var(--shadow-sm) !important;
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s !important;
+}}
+section.main .block-container > div .stColumns div[data-testid="column"] div[data-testid="stButton"] > button:hover {{
+    background-color: {_HOVER} !important;
+    background: {_HOVER} !important;
+    border-color: {_BDRA} !important;
+    color: {_T1} !important;
+}}
+section.main .block-container > div .stColumns div[data-testid="column"] div[data-testid="stButton"] > button * {{
+    color: {_T1} !important;
+}}
+
+/* GENERIC MAIN BUTTONS */
+.stApp main div[data-testid="stButton"] > button {{
+    background-color: {_CARD} !important;
+    background: {_CARD} !important;
+    color: {_T2} !important;
+    border: 1px solid {_BDR} !important;
+    border-radius: 8px !important;
+}}
+.stApp main div[data-testid="stButton"] > button:hover {{
+    background-color: {_HOVER} !important;
+    background: {_HOVER} !important;
+    color: {_T1} !important;
+    border-color: {_BDRA} !important;
+}}
+
+.stChatMessage {{ animation: slideInLeft 0.4s ease-out; }}
+
+/* KEYFRAMES */
+@keyframes orbSpin {{ from {{ transform: rotate(0deg); }} to {{ transform: rotate(360deg); }} }}
+@keyframes orbPulse {{
+    0%, 100% {{ box-shadow: 0 8px 40px rgba(99,102,241,0.25), 0 0 80px rgba(99,102,241,0.1); }}
+    50%       {{ box-shadow: 0 8px 60px rgba(99,102,241,0.35), 0 0 100px rgba(99,102,241,0.18); }}
+}}
+@keyframes pageFadeIn      {{ from {{ opacity: 0; transform: translateY(10px); }} to {{ opacity: 1; transform: translateY(0); }} }}
+@keyframes contentSlideUp  {{ from {{ opacity: 0; transform: translateY(20px); }} to {{ opacity: 1; transform: translateY(0); }} }}
+
+@media (max-width: 576px) {{
+    .welcome-greeting {{ font-size: 1.5rem; }}
+    [data-testid="stMetricValue"] {{ font-size: 1.4rem; }}
+}}
+</style>
+""",
+    unsafe_allow_html=True,
+)
+
+# =========================
+# API & SESSION STATE
+# =========================
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+MODEL = "gpt-4o-mini"
+
+# =========================
+# THEME TOGGLE
+# =========================
+def apply_theme():
+    base = st.session_state.theme_base
+    st._config.set_option("theme.base", base)  # type: ignore
+    st.rerun()
 
 # =========================
 # SAVE CHAT HELPER
@@ -530,7 +708,7 @@ def save_current_chat():
         return
     first_user_msg = next(
         (m["content"] for m in st.session_state.chat_history if m["role"] == "user"),
-        "Untitled Chat"
+        "Untitled Chat",
     )
     title = first_user_msg[:40] + "..." if len(first_user_msg) > 40 else first_user_msg
     timestamp = datetime.now().isoformat()
@@ -545,13 +723,11 @@ def save_current_chat():
         st.session_state.saved_chats.append(chat_data)
         st.session_state.current_chat_index = len(st.session_state.saved_chats) - 1
 
-
 # =========================
 # LOAD STATIC / BASE DATA
 # =========================
 employee_metrics = fetch_employee_data()
 employees_df = fetch_employee_details()
-
 
 # =========================
 # Connect to PostgreSQL
@@ -562,13 +738,9 @@ if conn:
 else:
     st.error("Failed to connect to the database!")
 
-
 # =========================
-# TOP BAR — pure HTML, always one row on every screen size
-# Mode switching via st.query_params
+# TOP BAR
 # =========================
-
-# Read mode from query params (set by the HTML buttons below)
 _qp = st.query_params.get("mode", None)
 if _qp in ("chat", "dashboard"):
     st.session_state.mode = _qp
@@ -579,73 +751,6 @@ _active_dash = "topbar-icon-active" if st.session_state.mode == "dashboard" else
 
 st.markdown(
     f"""
-    <style>
-    .topbar-row {{
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: nowrap;
-        padding: 0.65rem 0 0.55rem 0;
-        gap: 0.5rem;
-    }}
-    .topbar-left {{ flex: 1 1 auto; min-width: 0; }}
-    .topbar-title {{
-        font-family: 'DM Serif Display', Georgia, serif;
-        font-size: 1.5rem;
-        font-weight: 400;
-        color: #0F1523;
-        letter-spacing: -0.02em;
-        line-height: 1.2;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }}
-    .topbar-subtitle {{
-        font-size: 0.78rem;
-        color: #9BA3B8;
-        letter-spacing: 0.04em;
-        margin-top: 0.15rem;
-        text-transform: uppercase;
-        white-space: nowrap;
-    }}
-    .topbar-icons {{
-        display: flex;
-        align-items: center;
-        gap: 0.35rem;
-        flex-shrink: 0;
-    }}
-    .topbar-icon-btn {{
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 40px;
-        height: 40px;
-        border: 1px solid rgba(0,0,0,0.10);
-        border-radius: 10px;
-        background: #FFFFFF;
-        font-size: 1.1rem;
-        cursor: pointer;
-        text-decoration: none;
-        transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-    }}
-    .topbar-icon-btn:hover {{
-        background: #F1F4F9;
-        border-color: rgba(99,102,241,0.35);
-        box-shadow: 0 4px 12px rgba(99,102,241,0.12);
-    }}
-    .topbar-icon-active {{
-        background: rgba(99,102,241,0.08) !important;
-        border-color: rgba(99,102,241,0.4) !important;
-        box-shadow: 0 0 0 3px rgba(99,102,241,0.10) !important;
-    }}
-    @media (max-width: 576px) {{
-        .topbar-title   {{ font-size: 1.05rem; }}
-        .topbar-subtitle{{ font-size: 0.6rem;  }}
-        .topbar-icon-btn{{ width: 36px; height: 36px; font-size: 1rem; }}
-    }}
-    </style>
-
     <div class="topbar-row">
       <div class="topbar-left">
         <div class="topbar-title">CEO AI Assistant</div>
@@ -658,44 +763,34 @@ st.markdown(
            href="?mode=dashboard" title="Dashboard">📊</a>
       </div>
     </div>
-    <hr style="border:none;border-top:1px solid rgba(0,0,0,0.07);margin:0 0 1rem 0;"/>
+    <hr style="border:none;border-top:1px solid {_BDR};margin:0 0 1rem 0;"/>
     """,
     unsafe_allow_html=True,
 )
 
-
 # =========================
-# SIDEBAR  — ChatGPT-style layout
+# SIDEBAR
 # =========================
 with st.sidebar:
-    # ── HEADER (fixed) ──────────────────────────────────────────────
     st.markdown(
         """
-        <div style='padding: 1.5rem 0 1rem 0;'>
-          <div style='font-family:"DM Serif Display",Georgia,serif; font-size:1.2rem;
-                      font-weight:400; color:#0F1523; letter-spacing:-0.02em;'>
-            CEO AI Assistant
-          </div>
-          <div style='font-size:0.68rem; color:#9BA3B8; margin-top:0.2rem;
-                      letter-spacing:0.08em; text-transform:uppercase;'>
-            Executive Workspace
-          </div>
+        <div class="sidebar-header-card">
+          <div class="sidebar-header-title">CEO AI Assistant</div>
+          <div class="sidebar-header-subtitle">Executive Workspace</div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    # ── NEW CHAT (fixed) ─────────────────────────────────────────────
-    st.markdown('<div class="new-chat-btn">', unsafe_allow_html=True)
-    if st.button("＋   New Chat", key="new_chat_btn"):
+    st.markdown('<div class="sidebar-newchat-wrap">', unsafe_allow_html=True)
+    if st.button("＋  New Chat", key="new_chat_btn"):
         st.session_state.chat_history = []
         st.session_state.current_chat_index = None
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("<hr class='sidebar-divider'/>", unsafe_allow_html=True)
 
-    # ── SEARCH (fixed) ────────────────────────────────────────────────
     search_query = st.text_input(
         "Search",
         placeholder="Search conversations...",
@@ -703,28 +798,39 @@ with st.sidebar:
         key="search_chats",
     )
 
-    # ── SETTINGS (fixed) ─────────────────────────────────────────────
+    st.markdown("<hr class='sidebar-divider'/>", unsafe_allow_html=True)
+
     with st.expander("⚙  Settings"):
         new_name = st.text_input(
             "Your Name",
             value=st.session_state.get("user_name", ""),
-            key="user_name_input"
+            key="user_name_input",
         )
         st.session_state.user_name = new_name
 
-    # ── CLEAR CHAT (fixed) ────────────────────────────────────────────
+        theme_choice = st.radio(
+            "Theme",
+            options=["Light", "Dark"],
+            index=0 if not st.session_state.dark_mode else 1,
+            horizontal=True,
+            key="theme_radio",
+        )
+        if theme_choice == "Dark" and not st.session_state.dark_mode:
+            st.session_state.dark_mode = True
+            st.rerun()
+        elif theme_choice == "Light" and st.session_state.dark_mode:
+            st.session_state.dark_mode = False
+            st.rerun()
+
     st.markdown('<div class="clear-btn">', unsafe_allow_html=True)
     if st.button("Clear Current Chat", key="clear_chat_btn"):
         st.session_state.chat_history = []
         st.session_state.current_chat_index = None
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("<hr class='sidebar-divider'/>", unsafe_allow_html=True)
 
-    # ── SCROLLABLE CHAT HISTORY ────────────────────────────────────────
-    # Everything below this point lives in the last stVerticalBlock child
-    # which has overflow-y: auto applied via CSS above.
     saved = st.session_state.get("saved_chats", [])
 
     def render_chat_row(i, chat, key_prefix):
@@ -749,7 +855,7 @@ with st.sidebar:
                 ):
                     st.session_state.current_chat_index -= 1
                 st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
     if search_query:
         st.markdown(
@@ -757,7 +863,8 @@ with st.sidebar:
             unsafe_allow_html=True,
         )
         filtered = [
-            (i, chat) for i, chat in enumerate(saved)
+            (i, chat)
+            for i, chat in enumerate(saved)
             if search_query.lower() in chat.get("title", "").lower()
         ]
         if filtered:
@@ -765,7 +872,7 @@ with st.sidebar:
                 render_chat_row(i, chat, "search")
         else:
             st.markdown(
-                "<p style='font-size:0.82rem;color:#9BA3B8;padding:0 0.75rem;'>No results found</p>",
+                f"<p style='font-size:0.82rem;color:{_T4};padding:0 0.75rem;'>No results found</p>",
                 unsafe_allow_html=True,
             )
     else:
@@ -794,7 +901,7 @@ with st.sidebar:
         has_any = any(groups.values())
         if not has_any:
             st.markdown(
-                "<p style='font-size:0.82rem;color:#9BA3B8;padding:0 0.75rem;'>No conversations yet</p>",
+                f"<p style='font-size:0.82rem;color:{_T4};padding:0 0.75rem;'>No conversations yet</p>",
                 unsafe_allow_html=True,
             )
         else:
@@ -807,7 +914,6 @@ with st.sidebar:
                     for i, chat in chats:
                         render_chat_row(i, chat, "recent")
 
-
 # =========================
 # LOAD DATA FROM DATABASE
 # =========================
@@ -817,9 +923,8 @@ instructor_df = fetch_instructor_performance()
 employee_trend_df = fetch_employee_trend()
 former_df = fetch_former_employees()
 
-
 # =========================
-# MAIN CONTENT: CHAT OR DASHBOARD
+# MAIN CONTENT
 # =========================
 if st.session_state.mode == "chat":
     if len(st.session_state.chat_history) == 0:
@@ -836,9 +941,9 @@ if st.session_state.mode == "chat":
             unsafe_allow_html=True,
         )
 
-        st.markdown('<div class="suggestion">', unsafe_allow_html=True)
-        col1, col2, col3 = st.columns(3)
         user_q = None
+        col1, col2, col3 = st.columns(3)
+
         with col1:
             if st.button(
                 "Show me a summary of our workforce and key risks", key="s1"
@@ -858,7 +963,6 @@ if st.session_state.mode == "chat":
                 user_q = (
                     "How are new joiners performing and how many are at risk in probation?"
                 )
-        st.markdown("</div>", unsafe_allow_html=True)
 
         if user_q:
             st.session_state.chat_history.append(
