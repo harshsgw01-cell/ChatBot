@@ -57,7 +57,6 @@ st.markdown(
     --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
     --shadow-lg: 0 12px 40px rgba(0,0,0,0.10);
     --shadow-glow: 0 0 30px rgba(99,102,241,0.12);
-    /* Streamlit toolbar height — adjust if needed */
     --toolbar-height: 3rem;
 }
 
@@ -65,13 +64,6 @@ st.markdown(
 footer { visibility: hidden; }
 [data-testid="stDecoration"] { display: none; }
 
-/* ─────────────────────────────────────────
-   STREAMLIT TOOLBAR / TOP-CHROME FIX
-   Push ALL main content below the toolbar
-   so it never overlaps your header.
-───────────────────────────────────────── */
-
-/* The fixed top bar that Streamlit injects */
 header[data-testid="stHeader"] {
     background: #FFFFFF !important;
     border-bottom: 1px solid var(--border) !important;
@@ -79,7 +71,6 @@ header[data-testid="stHeader"] {
     z-index: 999 !important;
 }
 
-/* Make the main block-container start BELOW the header */
 .block-container {
     padding-top: calc(var(--toolbar-height) + 1rem) !important;
     padding-bottom: 2rem;
@@ -87,7 +78,6 @@ header[data-testid="stHeader"] {
     animation: contentSlideUp 0.7s ease-out 0.1s both;
 }
 
-/* On mobile the toolbar can be taller — add extra breathing room */
 @media (max-width: 768px) {
     .block-container {
         padding-top: calc(var(--toolbar-height) + 0.5rem) !important;
@@ -96,7 +86,6 @@ header[data-testid="stHeader"] {
     }
 }
 
-/* ── MAIN APP BACKGROUND + PAGE LOAD ANIM ── */
 .stApp {
     background: #FFFFFF;
     color: var(--text-primary);
@@ -104,20 +93,136 @@ header[data-testid="stHeader"] {
     animation: pageFadeIn 0.7s ease-out both;
 }
 
-/* Help animate main vertical content block as well */
 main [data-testid="stVerticalBlock"] {
     animation: contentSlideUp 0.7s ease-out 0.15s both;
 }
 
-/* ── SIDEBAR ── */
+/* ─────────────────────────────────────────
+   TOP BAR — always one row, icons never wrap
+───────────────────────────────────────── */
+.topbar-outer {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    flex-wrap: nowrap !important;
+    padding: 0.6rem 0 0.55rem 0;
+    gap: 0.5rem;
+}
+.topbar-left {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.topbar-title {
+    font-family: 'DM Serif Display', Georgia, serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    animation: slideDownFadeIn 0.8s ease-out 0.1s both;
+}
+.topbar-subtitle {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    margin-top: 0.15rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+    animation: slideUpFadeIn 0.8s ease-out 0.15s both;
+}
+
+/* Force the Streamlit columns holding the icons to shrink, not wrap */
+div[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] button[title="Chat"]) {
+    flex: 0 0 auto !important;
+    min-width: unset !important;
+    max-width: 96px !important;
+    gap: 0.25rem !important;
+}
+div[data-testid="stHorizontalBlock"]:has(> div[data-testid="stColumn"] button[title="Chat"]) > div[data-testid="stColumn"] {
+    flex: 0 0 44px !important;
+    min-width: 44px !important;
+    padding: 0 2px !important;
+}
+
+/* The outer stHorizontalBlock for the whole topbar row */
+.topbar-row-block > div[data-testid="stHorizontalBlock"] {
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    gap: 0 !important;
+}
+/* Title column takes remaining space */
+.topbar-row-block > div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:first-child {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+/* Icon column fixed width */
+.topbar-row-block > div[data-testid="stHorizontalBlock"] > div[data-testid="stColumn"]:last-child {
+    flex: 0 0 96px !important;
+    min-width: 96px !important;
+    max-width: 96px !important;
+}
+
+@media (max-width: 576px) {
+    .topbar-title    { font-size: 1.05rem !important; }
+    .topbar-subtitle { font-size: 0.6rem  !important; }
+}
+
+/* ─────────────────────────────────────────
+   CHATGPT-STYLE SIDEBAR
+   Fixed top zone  |  Scrollable history
+───────────────────────────────────────── */
 [data-testid="stSidebar"] {
     background: #FFFFFF !important;
     border-right: 1px solid var(--border) !important;
     box-shadow: 2px 0 12px rgba(0,0,0,0.04) !important;
 }
+
+/* Make sidebar a full-height flex column */
+[data-testid="stSidebar"] > div:first-child,
 [data-testid="stSidebar"] section[data-testid="stSidebarContent"] {
-    padding: 1.25rem 0.85rem;
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+    padding: 0 !important;
 }
+
+/* The root vertical block also stretches */
+[data-testid="stSidebar"] section[data-testid="stSidebarContent"] > div[data-testid="stVerticalBlock"] {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    padding: 0 0.85rem !important;
+    gap: 0 !important;
+}
+
+/* Every direct child except the last = fixed (non-scrolling) */
+[data-testid="stSidebar"] section[data-testid="stSidebarContent"] > div[data-testid="stVerticalBlock"] > div {
+    flex-shrink: 0 !important;
+}
+
+/* The LAST direct child = grows + scrolls (this is where chat list lives) */
+[data-testid="stSidebar"] section[data-testid="stSidebarContent"] > div[data-testid="stVerticalBlock"] > div:last-child {
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-bottom: 1.5rem !important;
+    scrollbar-width: thin !important;
+    scrollbar-color: #E2E5EF transparent !important;
+    margin-top: 0.25rem !important;
+}
+[data-testid="stSidebar"] section[data-testid="stSidebarContent"] > div[data-testid="stVerticalBlock"] > div:last-child::-webkit-scrollbar {
+    width: 3px !important;
+}
+[data-testid="stSidebar"] section[data-testid="stSidebarContent"] > div[data-testid="stVerticalBlock"] > div:last-child::-webkit-scrollbar-thumb {
+    background: #E2E5EF !important;
+    border-radius: 4px !important;
+}
+
 div[data-testid="collapsedControl"] {
     background: #FFFFFF !important;
     border: 1px solid var(--border) !important;
@@ -146,7 +251,6 @@ div[data-testid="collapsedControl"] {
     color: var(--text-primary) !important;
 }
 
-/* New Chat Button */
 .new-chat-btn div[data-testid="stButton"] > button {
     background: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(6,182,212,0.06) 100%) !important;
     border: 1px solid rgba(99,102,241,0.25) !important;
@@ -162,7 +266,6 @@ div[data-testid="collapsedControl"] {
     box-shadow: 0 4px 16px rgba(99,102,241,0.15) !important;
 }
 
-/* Clear Chat Button */
 .clear-btn div[data-testid="stButton"] > button {
     color: #EF4444 !important;
     font-size: 0.82rem !important;
@@ -172,7 +275,6 @@ div[data-testid="collapsedControl"] {
     color: #DC2626 !important;
 }
 
-/* Delete Button (sidebar, for chats) */
 .del-btn div[data-testid="stButton"] > button {
     color: #9BA3B8 !important;
     font-size: 0.8rem !important;
@@ -186,7 +288,6 @@ div[data-testid="collapsedControl"] {
     background: rgba(239,68,68,0.10) !important;
 }
 
-/* Section Labels */
 .section-label {
     font-size: 0.68rem;
     font-weight: 600;
@@ -197,14 +298,12 @@ div[data-testid="collapsedControl"] {
     display: block;
 }
 
-/* Sidebar Divider */
 .sidebar-divider {
     border: none;
     border-top: 1px solid var(--border);
     margin: 0.6rem 0;
 }
 
-/* Sidebar Search Input */
 [data-testid="stSidebar"] input[type="text"] {
     background: var(--bg-primary) !important;
     border: 1px solid var(--border) !important;
@@ -218,7 +317,6 @@ div[data-testid="collapsedControl"] {
     box-shadow: 0 0 0 3px rgba(99,102,241,0.08) !important;
 }
 
-/* Expander */
 [data-testid="stSidebar"] details {
     border: none !important;
     box-shadow: none !important;
@@ -257,36 +355,6 @@ div[data-testid="collapsedControl"] {
     animation: fadeInScale 0.6s ease-out 0.1s both;
 }
 
-/* ── TOP BAR ── */
-.topbar-wrap {
-    /* sits in the normal document flow, already below the Streamlit header
-       because of the block-container padding we set above */
-    padding: 0.75rem 0 0.65rem 0;
-}
-.topbar-title {
-    font-family: 'DM Serif Display', Georgia, serif;
-    font-size: 1.5rem;
-    font-weight: 400;
-    color: var(--text-primary);
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-    animation: slideDownFadeIn 0.8s ease-out 0.1s both;
-}
-.topbar-subtitle {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    letter-spacing: 0.04em;
-    margin-top: 0.15rem;
-    text-transform: uppercase;
-    animation: slideUpFadeIn 0.8s ease-out 0.15s both;
-}
-
-/* Mobile: shrink title text */
-@media (max-width: 576px) {
-    .topbar-title   { font-size: 1.15rem !important; }
-    .topbar-subtitle{ font-size: 0.68rem !important; }
-}
-
 /* ── WELCOME SCREEN ── */
 .welcome-container {
     display: flex;
@@ -298,8 +366,6 @@ div[data-testid="collapsedControl"] {
     padding: 3rem 2rem;
     animation: contentSlideUp 0.8s ease-out 0.2s both;
 }
-
-/* Fully filled gradient orb */
 .welcome-orb {
     width: 88px;
     height: 88px;
@@ -310,8 +376,6 @@ div[data-testid="collapsedControl"] {
     animation: orbSpin 10s linear infinite, orbPulse 3s ease-in-out infinite, fadeInScale 0.7s ease-out 0.1s both;
     box-shadow: 0 8px 40px rgba(99,102,241,0.25), 0 0 80px rgba(99,102,241,0.1);
 }
-.welcome-orb::after { content: none; }
-
 .welcome-greeting {
     font-family: 'DM Serif Display', Georgia, serif;
     font-size: 2.4rem;
@@ -374,13 +438,11 @@ div[data-testid="collapsedControl"] {
     box-shadow: 0 0 0 3px rgba(99,102,241,0.08), var(--shadow-sm) !important;
 }
 
-/* ── HR DIVIDER ── */
 hr {
     border-color: var(--border) !important;
     margin: 0.5rem 0 1rem 0 !important;
 }
 
-/* ── PLOTLY CHARTS ── */
 [data-testid="stPlotlyChart"] {
     background: var(--bg-card) !important;
     border: 1px solid var(--border) !important;
@@ -502,143 +564,120 @@ else:
 
 
 # =========================
-# TOP BAR  (fixed: wrapped in .topbar-wrap so it sits below Streamlit toolbar)
+# TOP BAR — pure HTML, always one row on every screen size
+# Mode switching via st.query_params
 # =========================
-col_title, col_icons = st.columns([9, 1])
 
-with col_title:
-    st.markdown(
-        """
-        <div class="topbar-wrap">
-          <div class="topbar-title">CEO AI Assistant</div>
-          <div class="topbar-subtitle">Strategic HR &amp; Workforce Intelligence</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+# Read mode from query params (set by the HTML buttons below)
+_qp = st.query_params.get("mode", None)
+if _qp in ("chat", "dashboard"):
+    st.session_state.mode = _qp
+    st.query_params.clear()
 
-with col_icons:
-    # small spacer to vertically align icons with the title
-    st.markdown("<div style='height:1rem'></div>", unsafe_allow_html=True)
-    icon1, icon2 = st.columns([1, 1])
-    with icon1:
-        chat_clicked = st.button("💬", key="chat_mode_icon", help="Chat")
-    with icon2:
-        dash_clicked = st.button("📊", key="dash_mode_icon", help="Dashboard")
+_active_chat = "topbar-icon-active" if st.session_state.mode == "chat" else ""
+_active_dash = "topbar-icon-active" if st.session_state.mode == "dashboard" else ""
 
-if chat_clicked:
-    st.session_state.mode = "chat"
-    st.rerun()
-if dash_clicked:
-    st.session_state.mode = "dashboard"
-    st.rerun()
+st.markdown(
+    f"""
+    <style>
+    .topbar-row {{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: nowrap;
+        padding: 0.65rem 0 0.55rem 0;
+        gap: 0.5rem;
+    }}
+    .topbar-left {{ flex: 1 1 auto; min-width: 0; }}
+    .topbar-title {{
+        font-family: 'DM Serif Display', Georgia, serif;
+        font-size: 1.5rem;
+        font-weight: 400;
+        color: #0F1523;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }}
+    .topbar-subtitle {{
+        font-size: 0.78rem;
+        color: #9BA3B8;
+        letter-spacing: 0.04em;
+        margin-top: 0.15rem;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }}
+    .topbar-icons {{
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        flex-shrink: 0;
+    }}
+    .topbar-icon-btn {{
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border: 1px solid rgba(0,0,0,0.10);
+        border-radius: 10px;
+        background: #FFFFFF;
+        font-size: 1.1rem;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }}
+    .topbar-icon-btn:hover {{
+        background: #F1F4F9;
+        border-color: rgba(99,102,241,0.35);
+        box-shadow: 0 4px 12px rgba(99,102,241,0.12);
+    }}
+    .topbar-icon-active {{
+        background: rgba(99,102,241,0.08) !important;
+        border-color: rgba(99,102,241,0.4) !important;
+        box-shadow: 0 0 0 3px rgba(99,102,241,0.10) !important;
+    }}
+    @media (max-width: 576px) {{
+        .topbar-title   {{ font-size: 1.05rem; }}
+        .topbar-subtitle{{ font-size: 0.6rem;  }}
+        .topbar-icon-btn{{ width: 36px; height: 36px; font-size: 1rem; }}
+    }}
+    </style>
 
-st.markdown("""<hr/>""", unsafe_allow_html=True)
+    <div class="topbar-row">
+      <div class="topbar-left">
+        <div class="topbar-title">CEO AI Assistant</div>
+        <div class="topbar-subtitle">Strategic HR &amp; Workforce Intelligence</div>
+      </div>
+      <div class="topbar-icons">
+        <a class="topbar-icon-btn {_active_chat}"
+           href="?mode=chat" title="Chat">💬</a>
+        <a class="topbar-icon-btn {_active_dash}"
+           href="?mode=dashboard" title="Dashboard">📊</a>
+      </div>
+    </div>
+    <hr style="border:none;border-top:1px solid rgba(0,0,0,0.07);margin:0 0 1rem 0;"/>
+    """,
+    unsafe_allow_html=True,
+)
 
 
 # =========================
-# SIDEBAR
+# SIDEBAR  — ChatGPT-style layout
 # =========================
 with st.sidebar:
+    # ── HEADER (fixed) ──────────────────────────────────────────────
     st.markdown(
         """
-        <style>
-        [data-testid="stSidebar"] div[data-testid="stButton"] > button {
-            width: 100%;
-            text-align: left;
-            background: transparent !important;
-            border: none !important;
-            border-radius: 8px;
-            padding: 0.5rem 0.75rem;
-            font-size: 0.875rem;
-            color: #4B5675 !important;
-            font-weight: 400;
-            box-shadow: none !important;
-            transition: all 0.2s ease;
-        }
-        [data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {
-            background: #F1F4F9 !important;
-            color: #0F1523 !important;
-        }
-        .new-chat-btn div[data-testid="stButton"] > button {
-            background: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(6,182,212,0.05) 100%) !important;
-            border: 1px solid rgba(99,102,241,0.25) !important;
-            color: #4F46E5 !important;
-            font-weight: 600 !important;
-        }
-        .new-chat-btn div[data-testid="stButton"] > button:hover {
-            background: linear-gradient(135deg, rgba(99,102,241,0.14) 0%, rgba(6,182,212,0.1) 100%) !important;
-            box-shadow: 0 4px 16px rgba(99,102,241,0.15) !important;
-            color: #4338CA !important;
-        }
-        .clear-btn div[data-testid="stButton"] > button {
-            color: #EF4444 !important;
-            font-size: 0.82rem !important;
-        }
-        .clear-btn div[data-testid="stButton"] > button:hover {
-            background: rgba(239,68,68,0.07) !important;
-        }
-        .del-btn div[data-testid="stButton"] > button {
-            color: #9BA3B8 !important;
-            font-size: 0.8rem !important;
-            padding: 0.2rem 0.5rem !important;
-            border-radius: 999px !important;
-            width: 100% !important;
-            text-align: center !important;
-        }
-        .del-btn div[data-testid="stButton"] > button:hover {
-            color: #EF4444 !important;
-            background: rgba(239,68,68,0.10) !important;
-        }
-        .section-label {
-            font-size: 0.68rem;
-            font-weight: 600;
-            color: #9BA3B8;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            padding: 1rem 0.75rem 0.3rem 0.75rem;
-            display: block;
-        }
-        .sidebar-divider {
-            border: none;
-            border-top: 1px solid rgba(0,0,0,0.07);
-            margin: 0.6rem 0;
-        }
-        [data-testid="stSidebar"] input[type="text"] {
-            background: #F8F9FC !important;
-            border: 1px solid rgba(0,0,0,0.07) !important;
-            border-radius: 8px !important;
-            font-size: 0.875rem !important;
-            color: #0F1523 !important;
-        }
-        [data-testid="stSidebar"] details {
-            border: none !important;
-            box-shadow: none !important;
-            background: transparent !important;
-        }
-        [data-testid="stSidebar"] summary {
-            font-size: 0.875rem;
-            color: #4B5675;
-            padding: 0.45rem 0.75rem;
-            border-radius: 8px;
-        }
-        [data-testid="stSidebar"] summary:hover {
-            background: #F1F4F9;
-            color: #0F1523;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    # ── HEADER ──────────────────
-    st.markdown(
-        """
-        <div style='margin-top: 2.5rem; padding: 0.5rem 0.5rem 1.25rem 0.5rem;'>
-          <div style='font-family:"DM Serif Display",Georgia,serif; font-size:1.2rem; font-weight:400; color:#0F1523; letter-spacing:-0.02em;'>
+        <div style='padding: 1.5rem 0 1rem 0;'>
+          <div style='font-family:"DM Serif Display",Georgia,serif; font-size:1.2rem;
+                      font-weight:400; color:#0F1523; letter-spacing:-0.02em;'>
             CEO AI Assistant
           </div>
-          <div style='font-size:0.68rem; color:#9BA3B8; margin-top:0.2rem; letter-spacing:0.08em; text-transform:uppercase;'>
+          <div style='font-size:0.68rem; color:#9BA3B8; margin-top:0.2rem;
+                      letter-spacing:0.08em; text-transform:uppercase;'>
             Executive Workspace
           </div>
         </div>
@@ -646,7 +685,7 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-    # ── NEW CHAT ─────────────────
+    # ── NEW CHAT (fixed) ─────────────────────────────────────────────
     st.markdown('<div class="new-chat-btn">', unsafe_allow_html=True)
     if st.button("＋   New Chat", key="new_chat_btn"):
         st.session_state.chat_history = []
@@ -656,7 +695,7 @@ with st.sidebar:
 
     st.markdown("<hr class='sidebar-divider'/>", unsafe_allow_html=True)
 
-    # ── SEARCH ───────────────────
+    # ── SEARCH (fixed) ────────────────────────────────────────────────
     search_query = st.text_input(
         "Search",
         placeholder="Search conversations...",
@@ -664,9 +703,7 @@ with st.sidebar:
         key="search_chats",
     )
 
-    st.markdown("<hr class='sidebar-divider'/>", unsafe_allow_html=True)
-
-    # ── SETTINGS ─────────────────
+    # ── SETTINGS (fixed) ─────────────────────────────────────────────
     with st.expander("⚙  Settings"):
         new_name = st.text_input(
             "Your Name",
@@ -675,7 +712,7 @@ with st.sidebar:
         )
         st.session_state.user_name = new_name
 
-    # ── CLEAR CHAT ───────────────
+    # ── CLEAR CHAT (fixed) ────────────────────────────────────────────
     st.markdown('<div class="clear-btn">', unsafe_allow_html=True)
     if st.button("Clear Current Chat", key="clear_chat_btn"):
         st.session_state.chat_history = []
@@ -685,7 +722,9 @@ with st.sidebar:
 
     st.markdown("<hr class='sidebar-divider'/>", unsafe_allow_html=True)
 
-    # ── RECENTS ──────────────────
+    # ── SCROLLABLE CHAT HISTORY ────────────────────────────────────────
+    # Everything below this point lives in the last stVerticalBlock child
+    # which has overflow-y: auto applied via CSS above.
     saved = st.session_state.get("saved_chats", [])
 
     def render_chat_row(i, chat, key_prefix):
