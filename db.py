@@ -1,18 +1,15 @@
 import pyodbc
 
-def get_connection():
-    try:
-        conn = pyodbc.connect(
-            "DRIVER={ODBC Driver 17 for SQL Server};"
-            "SERVER=103.171.180.23;"        # Remote IP
-            "DATABASE=CEO_DASH;"            # Database name
-            "UID=CEO_DASH;"                 # SQL login
-            "PWD=P_?2TGuw1czpvk8f;"       # <-- put password here
-            "TrustServerCertificate=yes;"
-        )
-        
-        return conn
+pyodbc.pooling = True  # ✅ enable connection pooling
 
-    except Exception as e:
-        print("❌ SQL Server connection error:", e)
-        return None
+def get_connection():
+    return pyodbc.connect(
+        "DRIVER={ODBC Driver 17 for SQL Server};"
+        "SERVER=103.171.180.23;"
+        "DATABASE=CEO_DASH;"
+        "UID=CEO_DASH;"
+        "PWD=P_?2TGuw1czpvk8f;"
+        "TrustServerCertificate=yes;"
+    )
+
+      
