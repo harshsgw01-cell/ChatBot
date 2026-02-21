@@ -158,9 +158,6 @@ main [data-testid="stVerticalBlock"] {{ animation:contentSlideUp 0.7s ease-out 0
 
 /* ══════════════════════════════════════════════════
    SIDEBAR
-   FIX: Use a simpler overflow approach that actually
-   works — let the native Streamlit sidebar scroll,
-   just constrain the height properly.
    ══════════════════════════════════════════════════ */
 [data-testid="stSidebar"] {{
     background:{_BG2} !important;
@@ -220,12 +217,23 @@ main [data-testid="stVerticalBlock"] {{ animation:contentSlideUp 0.7s ease-out 0
 .sidebar-newchat-wrap div[data-testid="stButton"] > button:hover {{
     opacity:0.95; box-shadow:0 10px 26px rgba(99,102,241,0.32) !important; }}
 
-[data-testid="stSidebar"] div[data-testid="stButton"] > button {{
-    background:transparent !important; border:none !important; border-radius:8px;
-    padding:0.5rem 0.75rem; font-size:0.875rem; color:{_T2} !important; font-weight:400;
-    box-shadow:none !important; transition:all 0.2s ease; letter-spacing:0.01em; }}
-[data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {{
-    background:{_HOVER} !important; color:{_T1} !important; }}
+/* Generic sidebar buttons (except delete icon) */
+[data-testid="stSidebar"] div[data-testid="stButton"]:not(.del-btn) > button {{
+    background:transparent !important;
+    border:none !important;
+    border-radius:8px;
+    padding:0.5rem 0.75rem;
+    font-size:0.875rem;
+    color:{_T2} !important;
+    font-weight:400;
+    box-shadow:none !important;
+    transition:all 0.2s ease;
+    letter-spacing:0.01em;
+}}
+[data-testid="stSidebar"] div[data-testid="stButton"]:not(.del-btn) > button:hover {{
+    background:{_HOVER} !important;
+    color:{_T1} !important;
+}}
 
 .clear-btn div[data-testid="stButton"] > button {{ color:#EF4444 !important; font-size:0.82rem !important; }}
 .clear-btn div[data-testid="stButton"] > button:hover {{ background:rgba(239,68,68,0.07) !important; }}
@@ -235,12 +243,7 @@ main [data-testid="stVerticalBlock"] {{ animation:contentSlideUp 0.7s ease-out 0
 @media(max-width:768px)  {{ [data-testid="stSidebar"] {{ width:220px !important; }} }}
 @media(max-width:576px)  {{ [data-testid="stSidebar"] {{ width:200px !important; }} }}
 
-/* ══════════════════════════════════════════════════
-   CHAT ROW — single Streamlit button full-width,
-   with the ✕ delete button rendered as a real
-   Streamlit button hidden inside an absolutely
-   positioned wrapper so it stays on the same line.
-   ══════════════════════════════════════════════════ */
+/* CHAT ROW — full-width button with hover delete icon (ChatGPT style) */
 
 /* Wrapper for each chat history row */
 .chat-row-wrap {{
@@ -253,7 +256,7 @@ main [data-testid="stVerticalBlock"] {{ animation:contentSlideUp 0.7s ease-out 0
 .chat-row-wrap > div[data-testid="stButton"] > button {{
     width:100% !important;
     text-align:left !important;
-    padding:0.5rem 2.2rem 0.5rem 0.75rem !important;
+    padding:0.5rem 2.2rem 0.75rem 0.75rem !important;
     font-size:0.84rem !important;
     color:{_T2} !important;
     background:{_ROW_BG} !important;
@@ -283,7 +286,18 @@ main [data-testid="stVerticalBlock"] {{ animation:contentSlideUp 0.7s ease-out 0
     display:flex;
     align-items:center;
     justify-content:center;
+
+    /* hide by default */
+    opacity:0;
+    pointer-events:none;
 }}
+
+/* show delete icon only when hover row */
+.chat-row-wrap:hover .del-wrap {{
+    opacity:1;
+    pointer-events:auto;
+}}
+
 .del-wrap div[data-testid="stButton"] {{
     width:28px !important;
     height:28px !important;
@@ -303,11 +317,6 @@ main [data-testid="stVerticalBlock"] {{ animation:contentSlideUp 0.7s ease-out 0
     justify-content:center !important;
     box-shadow:none !important;
     line-height:1 !important;
-    transition:color 0.15s, background 0.15s !important;
-}}
-.del-wrap div[data-testid="stButton"] > button:hover {{
-    color:{_DEL_HCLR} !important;
-    background:{_DEL_HBG} !important;
 }}
 
 [data-testid="stSidebar"] [data-testid="stExpander"],
@@ -548,8 +557,14 @@ st.markdown(f"""
     <div class="topbar-subtitle">Strategic HR &amp; Workforce Intelligence</div>
   </div>
   <div class="topbar-icons">
-    <a class="topbar-icon-btn {_active_chat}" href="?mode=chat"      title="Chat">💬</a>
-    <a class="topbar-icon-btn {_active_dash}" href="?mode=dashboard" title="Dashboard">📊</a>
+    <a class="topbar-icon-btn {_active_chat}"
+       href="?mode=chat"
+       target="_self"
+       title="Chat">💬</a>
+    <a class="topbar-icon-btn {_active_dash}"
+       href="?mode=dashboard"
+       target="_self"
+       title="Dashboard">📊</a>
   </div>
 </div>
 <hr style="border:none;border-top:1px solid {_BDR};margin:0 0 1rem 0;"/>
@@ -558,7 +573,6 @@ st.markdown(f"""
 
 # =========================
 # HANDLE DEFERRED ACTIONS
-# (open/delete set in previous run, processed now before sidebar renders)
 # =========================
 if st.session_state.open_index is not None:
     idx = st.session_state.open_index
@@ -604,20 +618,33 @@ with st.sidebar:
     st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown("<hr/>", unsafe_allow_html=True)
-    search_query = st.text_input("Search", placeholder="Search conversations...",
-                                  label_visibility="collapsed", key="search_chats")
+    search_query = st.text_input(
+        "Search",
+        placeholder="Search conversations...",
+        label_visibility="collapsed",
+        key="search_chats",
+    )
     st.markdown("<hr/>", unsafe_allow_html=True)
 
     with st.expander("⚙  Settings"):
         st.session_state.user_name = st.text_input(
-            "Your Name", value=st.session_state.get("user_name", ""), key="user_name_input")
-        theme_choice = st.radio("Theme", ["Light", "Dark"],
-                                 index=1 if st.session_state.dark_mode else 0,
-                                 horizontal=True, key="theme_radio")
+            "Your Name",
+            value=st.session_state.get("user_name", ""),
+            key="user_name_input",
+        )
+        theme_choice = st.radio(
+            "Theme",
+            ["Light", "Dark"],
+            index=1 if st.session_state.dark_mode else 0,
+            horizontal=True,
+            key="theme_radio",
+        )
         if theme_choice == "Dark" and not st.session_state.dark_mode:
-            st.session_state.dark_mode = True; st.rerun()
+            st.session_state.dark_mode = True
+            st.rerun()
         elif theme_choice == "Light" and st.session_state.dark_mode:
-            st.session_state.dark_mode = False; st.rerun()
+            st.session_state.dark_mode = False
+            st.rerun()
 
     st.markdown('<div class="clear-btn">', unsafe_allow_html=True)
     if st.button("Clear Current Chat", key="clear_chat_btn"):
@@ -630,25 +657,20 @@ with st.sidebar:
 
     saved = st.session_state.get("saved_chats", [])
 
-    # ── render_chat_row: single-button row with absolutely positioned delete ──
-    # The open button fills the full row width (padded right so text doesn't
-    # overlap the ✕). The delete button sits in an absolutely-positioned div
-    # at the right edge — both are real Streamlit buttons so they work properly.
+    # ── Chat row with hover delete (ChatGPT style) ──
     def render_chat_row(i, chat, key_prefix):
         title = chat.get("title", f"Chat {i+1}")
         short = (title[:24] + "…") if len(title) > 24 else title
 
-        # Outer wrapper gives position:relative context for the del button
         st.markdown('<div class="chat-row-wrap">', unsafe_allow_html=True)
 
-        # Full-width open button
         if st.button(short, key=f"{key_prefix}_open_{i}"):
             st.session_state.open_index = i
             st.rerun()
 
-        # Delete button absolutely positioned over the right side
-        st.markdown('<div class="del-wrap">', unsafe_allow_html=True)
-        if st.button("✕", key=f"{key_prefix}_del_{i}", help="Delete chat"):
+        # mark delete wrapper as del-btn so generic sidebar CSS skips it
+        st.markdown('<div class="del-wrap del-btn">', unsafe_allow_html=True)
+        if st.button("🗑", key=f"{key_prefix}_del_{i}", help="Delete chat"):
             st.session_state.delete_index = i
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)  # .del-wrap
@@ -656,38 +678,63 @@ with st.sidebar:
         st.markdown("</div>", unsafe_allow_html=True)  # .chat-row-wrap
 
     if search_query:
-        st.markdown("<span class='section-label'>Search Results</span>", unsafe_allow_html=True)
-        filtered = [(i, c) for i, c in enumerate(saved)
-                    if search_query.lower() in c.get("title", "").lower()]
+        st.markdown(
+            "<span class='section-label'>Search Results</span>",
+            unsafe_allow_html=True,
+        )
+        filtered = [
+            (i, c)
+            for i, c in enumerate(saved)
+            if search_query.lower() in c.get("title", "").lower()
+        ]
         if filtered:
             for i, chat in filtered:
                 render_chat_row(i, chat, "search")
         else:
-            st.markdown(f"<p style='font-size:0.82rem;color:{_T4};padding:0 0.1rem;'>No results found</p>",
-                        unsafe_allow_html=True)
+            st.markdown(
+                f"<p style='font-size:0.82rem;color:{_T4};padding:0 0.1rem;'>No results found</p>",
+                unsafe_allow_html=True,
+            )
     else:
-        today     = datetime.now().date()
+        today = datetime.now().date()
         yesterday = today - timedelta(days=1)
-        groups    = {"Today": [], "Yesterday": [], "Previous 7 Days": [], "Older": []}
+        groups = {
+            "Today": [],
+            "Yesterday": [],
+            "Previous 7 Days": [],
+            "Older": [],
+        }
         for i, chat in enumerate(reversed(saved)):
             real_idx = len(saved) - 1 - i
             chat_date = None
             try:
-                chat_date = datetime.fromisoformat(chat.get("timestamp", "")).date()
+                chat_date = datetime.fromisoformat(
+                    chat.get("timestamp", "")
+                ).date()
             except Exception:
                 pass
-            if chat_date == today:                             groups["Today"].append((real_idx, chat))
-            elif chat_date == yesterday:                       groups["Yesterday"].append((real_idx, chat))
-            elif chat_date and (today-chat_date).days <= 7:   groups["Previous 7 Days"].append((real_idx, chat))
-            else:                                              groups["Older"].append((real_idx, chat))
+
+            if chat_date == today:
+                groups["Today"].append((real_idx, chat))
+            elif chat_date == yesterday:
+                groups["Yesterday"].append((real_idx, chat))
+            elif chat_date and (today - chat_date).days <= 7:
+                groups["Previous 7 Days"].append((real_idx, chat))
+            else:
+                groups["Older"].append((real_idx, chat))
 
         if not any(groups.values()):
-            st.markdown(f"<p style='font-size:0.82rem;color:{_T4};padding:0 0.1rem;'>No conversations yet</p>",
-                        unsafe_allow_html=True)
+            st.markdown(
+                f"<p style='font-size:0.82rem;color:{_T4};padding:0 0.1rem;'>No conversations yet</p>",
+                unsafe_allow_html=True,
+            )
         else:
             for group_name, chats in groups.items():
                 if chats:
-                    st.markdown(f"<span class='section-label'>{group_name}</span>", unsafe_allow_html=True)
+                    st.markdown(
+                        f"<span class='section-label'>{group_name}</span>",
+                        unsafe_allow_html=True,
+                    )
                     for i, chat in chats:
                         render_chat_row(i, chat, "recent")
 

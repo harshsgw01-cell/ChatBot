@@ -6,10 +6,10 @@ from data import (
     fetch_employee_data,
     fetch_performance_risks,
     fetch_former_employees,
-   fetch_former_employees,
     fetch_employee_details,   # uses employees table
 )
 import pandas as pd
+from typing import Dict, Any
 
 
 client = OpenAI()
@@ -211,6 +211,54 @@ def build_hr_overview():
     }
 
 
+# ========= Extra: direct lookup in live HR tables (dashboard-compatible) =========
+
+def lookup_term_in_hr_data(term: str) -> Dict[str, Any]:
+    """
+    Try to find a free‑text term (e.g. 'IT', 'Finance') in the live HR tables.
+    If we find matching rows, return a small summary dict; otherwise return {}.
+    This uses the same fetch_* functions your dashboard already uses.
+    """
+    term = term.strip().lower()
+    summary: Dict[str, Any] = {}
+
+    employees_df = fetch_employee_details()
+    former_df = fetch_former_employees()
+
+    # 1) Department presence and headcount (current employees)
+    if employees_df is not None and not employees_df.empty and "department" in employees_df.columns:
+        dept_mask = employees_df["department"].str.lower() == term
+        dept_rows = employees_df[dept_mask]
+        if not dept_rows.empty:
+            summary["department_name"] = term
+            summary["headcount"] = int(len(dept_rows))
+            if "total_salary" in dept_rows.columns:
+                summary["monthly_payroll_qr"] = float(dept_rows["total_salary"].sum())
+            if "job_title" in dept_rows.columns:
+                summary["top_roles"] = (
+                    dept_rows["job_title"].value_counts().head(5).to_dict()
+                )
+
+    # 2) Turnover for that department (former employees)
+    if former_df is not None and not former_df.empty and "department" in former_df.columns:
+        dept_mask_f = former_df["department"].str.lower() == term
+        dept_leavers = former_df[dept_mask_f]
+        if not dept_leavers.empty:
+            summary["leavers_total"] = int(len(dept_leavers))
+            if "dateofleaving" in dept_leavers.columns:
+                fd = dept_leavers.copy()
+                fd["dol"] = pd.to_datetime(fd["dateofleaving"])
+                last_year = pd.Timestamp("today").year - 1
+                last_year_leavers = fd[fd["dol"].dt.year == last_year]
+                summary["leavers_last_year"] = int(len(last_year_leavers))
+            if "terminationtype" in dept_leavers.columns:
+                summary["termination_breakdown"] = (
+                    dept_leavers["terminationtype"].value_counts().to_dict()
+                )
+
+    return summary
+
+
 def answer_ceo_question(question: str) -> str:
     """
     Main entry point for the CEO Q&A.
@@ -219,8 +267,48 @@ def answer_ceo_question(question: str) -> str:
       - employees: the full employee / HR data structure (detailed list and stats)
       - question: CEO's natural-language question
     """
+    q = question.lower().strip()
 
-    q = question.lower()
+    # 0) Try to look up a department/term directly in live HR tables first.
+    #    Simple heuristic: take the last meaningful word as the term.
+    words = [w.strip(".,!? ") for w in q.split() if len(w) > 1]
+    term = words[-1] if words else ""
+
+    if term:
+        lookup = lookup_term_in_hr_data(term)
+        if lookup:
+            dept = lookup.get("department_name", term).title()
+            headcount = lookup.get("headcount")
+            leavers_total = lookup.get("leavers_total")
+            leavers_last_year = lookup.get("leavers_last_year")
+            payroll = lookup.get("monthly_payroll_qr")
+            roles = lookup.get("top_roles")
+            term_brk = lookup.get("termination_breakdown")
+
+            lines = []
+            # one direct sentence
+            if headcount is not None:
+                lines.append(
+                    f"{dept} department is present in the HR data with about {headcount} employees."
+                )
+            else:
+                lines.append(
+                    f"{dept} appears in the HR data, but only partial details are available."
+                )
+
+            # short bullets
+            if payroll is not None:
+                lines.append(f"- Estimated monthly payroll: QAR {round(payroll, 2)}")
+            if leavers_total is not None:
+                lines.append(f"- Total leavers recorded: {leavers_total}")
+            if leavers_last_year is not None:
+                lines.append(f"- Leavers in the last year: {leavers_last_year}")
+            if term_brk:
+                lines.append(f"- Termination breakdown: {term_brk}")
+            if roles:
+                lines.append(f"- Top roles in this department: {roles}")
+
+            return "\n".join(lines)
 
     # keywords that should use the nationality logic
     NATIONALITY_KEYWORDS = [
